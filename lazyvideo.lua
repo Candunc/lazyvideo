@@ -43,7 +43,7 @@ function processYoutube()
 				db["ignore"][video["id"]] = true
 
 				--Here we don't use exec because we don't need the output.
-				os.execute("youtube-dl -o \""..config["path"].."/%(uploader)s - %(title)s.%(ext)s\" \""..video["webpage_url"].."\"")
+				os.execute("youtube-dl -o \""..db["config"]["path"].."/%(uploader)s - %(title)s.%(ext)s\" \""..video["webpage_url"].."\"")
 				--Using path combined with youtube-dl autonaming https://github.com/rg3/youtube-dl/#output-template
 			end
 		end
@@ -51,6 +51,13 @@ function processYoutube()
 end
 
 function processRT()
+	if db["config"]["username"] ~= nil and db["config"]["password"] ~= nil and db["config"]["username"] ~= "" and db["config"]["password"] then
+		--Move this _really_ long if statement to the start so that it only gets called once
+		--I'm assuming that the username and password do not have reserved characters.
+		username_set = true
+	end
+
+
 	--It would be more efficient to do this with ipairs, however PHP turns integers into strings when encoding json.
 	for _,video in pairs(exec("curl -s \"https://rtdownloader.com/api/?action=GetLatest\"")) do
 		if db["config"]["roosterteeth"][video["showName"]] ~= nil and db["ignore"][video["hash"]] == nil then
@@ -58,7 +65,7 @@ function processRT()
 			filename = ("\""..db["config"]["path"].."/"..video["title"].." - "..video["caption"]..".mp4\"")
 			url =  (" \"http://"..video["channelUrl"].."/"..video["slug"].."\" ")
 
-			if db["config"]["username"] ~= nil and db["config"]["password"] ~= nil then	
+			if username_set == true then
 				os.execute("youtube-dl -o "..filename.." -u "..db["config"]["username"].." -p "..db["config"]["password"]..url)
 			else
 				os.execute("youtube-dl -o "..filename..url)
