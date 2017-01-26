@@ -53,7 +53,7 @@ end
 function processRT()
 	--It would be more efficient to do this with ipairs, however PHP turns integers into strings when encoding json.
 	for _,video in pairs(exec("curl -s \"https://rtdownloader.com/api/?action=GetLatest\"")) do
-		if db["config"]["roosterteeth"][video["showName"]] ==  and db["ignore"][video["hash"]] == nil then
+		if db["config"]["roosterteeth"][video["showName"]] ~= nil and db["ignore"][video["hash"]] == nil then
 			db["ignore"][video["hash"]] = true
 			filename = ("\""..db["config"]["path"].."/"..video["title"].." - "..video["caption"]..".mp4\"")
 			url =  (" \"http://"..video["channelUrl"].."/"..video["slug"].."\" ")
