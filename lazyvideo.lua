@@ -39,12 +39,12 @@ function processYoutube()
 	for _,channel in ipairs(db["config"]["youtube"]) do
 		playlist = json.decode(exec("youtube-dl -J --playlist-items 1-4 https://www.youtube.com/user/"..channel.."/videos")) --Why the limit of 4? That's a good question.
 		for _,video in pairs(playlist["entries"]) do
-			--Important values are "id" and "webpage_url"
 			if db["ignore"][video["id"]] == nil then
 				db["ignore"][video["id"]] = true
-				--Should probably specify a directory.
+
 				--Here we don't use exec because we don't need the output.
-				os.execute("youtube-dl \""..video["webpage_url"].."\"")
+				os.execute("youtube-dl -o \""..config["path"].."/%(uploader)s - %(title)s.%(ext)s\" \""..video["webpage_url"].."\"")
+				--Using path combined with youtube-dl autonaming https://github.com/rg3/youtube-dl/#output-template
 			end
 		end
 	end
