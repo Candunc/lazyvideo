@@ -21,6 +21,7 @@ end
 function safeClose()
 	-- Flush database to file at end, rather than after every call.
 	saveDB("ignore")
+	os.execute("rmdir /tmp/lazyvideo")
 	os.exit()
 end
 
@@ -43,7 +44,9 @@ function processYoutube()
 				db["ignore"][video["id"]] = true
 
 				--Here we don't use exec because we don't need the output.
-				os.execute("youtube-dl -o \""..db["config"]["path"].."/%(uploader)s - %(title)s.%(ext)s\" \""..video["webpage_url"].."\"")
+				os.execute("youtube-dl -o \"/tmp/lazyvideo/%(uploader)s - %(title)s.%(ext)s\" \""..video["webpage_url"].."\"")
+				-- Workaround for letting rt-downloader decide the name, and not this program.
+				os.execute("mv \"/tmp/lazyvideo/"..video["uploader"].."*\" \""..db["config"]["path"].."/\"")
 				--Using path combined with youtube-dl autonaming https://github.com/rg3/youtube-dl/#output-template
 			end
 		end
@@ -57,24 +60,33 @@ function processRT()
 		username_set = true
 	end
 
+	--I realized after the fact that I have an ipairs sorted table for RT Shows, and then call them directly.
+	-- This is a workaround so that the config stays "simpler"
+	local showEnabled = {}
+	for _,title in ipairs(db["config"]["roosterteeth"]) do
+		showEnabled[title] = true
+	end
+
 
 	--It would be more efficient to do this with ipairs, however PHP turns integers into strings when encoding json.
-	for _,video in pairs(exec("curl -s \"https://rtdownloader.com/api/?action=GetLatest\"")) do
-		if db["config"]["roosterteeth"][video["showName"]] ~= nil and db["ignore"][video["hash"]] == nil then
+	for _,video in pairs(json.decode(exec("curl -s \"https://rtdownloader.com/api/?action=getLatest\""))) do
+		if showEnabled[video["showName"]] ~= nil and db["ignore"][video["hash"]] == nil then
 			db["ignore"][video["hash"]] = true
-			filename = ("\""..db["config"]["path"].."/"..video["title"].." - "..video["caption"]..".mp4\"")
+			filename = (video["title"].." - "..video["caption"]..".mp4")
 			url =  (" \"http://"..video["channelUrl"].."/"..video["slug"].."\" ")
 
 			if username_set == true then
-				os.execute("youtube-dl -o "..filename.." -u "..db["config"]["username"].." -p "..db["config"]["password"]..url)
+				os.execute("youtube-dl -o \"/tmp/lazyvideo/"..filename.."\" -u "..db["config"]["username"].." -p "..db["config"]["password"]..url)
 			else
-				os.execute("youtube-dl -o "..filename..url)
+				os.execute("youtube-dl -o \"/tmp/lazyvideo/"..filename.."\" "..url)
 			end
+			os.execute("mv \"/tmp/lazyvideo/"..filename.."\" \""..config["path"].."/\"")
 		end
 	end
 end
 
 function sync()
+	os.execute("mkdir /tmp/lazyvideo")
 	if db["config"]["youtube"] ~= nil then
 		-- Catch error on newly initialized configs
 		processYoutube()
