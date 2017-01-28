@@ -73,7 +73,7 @@ function processRT()
 		if showEnabled[video["showName"]] ~= nil and db["ignore"][video["hash"]] == nil then
 			db["ignore"][video["hash"]] = true
 			filename = (video["title"].." - "..video["caption"]..".mp4")
-			url =  (" \"http://"..video["channelUrl"].."/episode/"..video["slug"].."\" ")
+			url =  (" \"http://"..video["channelUrl"].."/episode/"..video["title"].."\" ")
 
 			if username_set == true then
 				os.execute("youtube-dl -o \"/tmp/lazyvideo/"..filename.."\" -u "..db["config"]["username"].." -p "..db["config"]["password"]..url)
