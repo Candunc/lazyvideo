@@ -72,7 +72,7 @@ function processRT()
 	for _,video in pairs(json.decode(exec("curl -s \"https://rtdownloader.com/api/?action=getLatest\""))) do
 		if showEnabled[video["showName"]] ~= nil and db["ignore"][video["hash"]] == nil then
 			db["ignore"][video["hash"]] = true
-			filename = (video["title"]..".mp4")
+			filename = (video["showName"].." - "..video["title"]..".mp4")
 			url =  (" \"http://"..video["channelUrl"].."/episode/"..video["slug"].."\" ")
 
 			if username_set == true then
@@ -80,7 +80,7 @@ function processRT()
 			else
 				os.execute("youtube-dl -o \"/tmp/lazyvideo/"..filename.."\" "..url)
 			end
-			os.execute("mv \"/tmp/lazyvideo/"..filename.."\" \""..config["path"].."/\"")
+			os.execute("mv \"/tmp/lazyvideo/"..filename.."\" \""..db["config"]["path"].."/\"")
 		end
 	end
 end
