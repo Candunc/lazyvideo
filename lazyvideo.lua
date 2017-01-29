@@ -37,6 +37,11 @@ end
 --my routine, I'd probably be a better person. 
 
 function processYoutube()
+	if db["config"]["youtube"] == nil then
+		--Config not initialized, close function
+		return nil
+	end
+
 	for _,channel in ipairs(db["config"]["youtube"]) do
 		playlist = json.decode(exec("youtube-dl -J --playlist-items 1-4 https://www.youtube.com/user/"..channel.."/videos")) --Why the limit of 4? That's a good question.
 		for _,video in pairs(playlist["entries"]) do
@@ -54,6 +59,11 @@ function processYoutube()
 end
 
 function processRT()
+	if db["config"]["roosterteeth"] == nil then
+		--Config not initialized, close function
+		return nil
+	end
+
 	if db["config"]["username"] ~= nil and db["config"]["password"] ~= nil and db["config"]["username"] ~= "" and db["config"]["password"] then
 		--Move this _really_ long if statement to the start so that it only gets called once
 		--I'm assuming that the username and password do not have reserved characters.
@@ -85,38 +95,35 @@ function processRT()
 	end
 end
 
-function sync()
-	os.execute("mkdir /tmp/lazyvideo")
-	if db["config"]["youtube"] ~= nil then
-		-- Catch error on newly initialized configs
-		processYoutube()
-	end
-
-	if db["config"]["roosterteeth"] ~= nil then
-		processRT()
-	end
-
-	safeClose()
-end
-
 db = {}
 loadDB("config")
 loadDB("ignore")
+os.execute("mkdir /tmp/lazyvideo")
 
 if db["config"]["path"] == "nil" then
 	db["config"]["path"] = "."
 	saveDB("config")
 end
 
-sync()
+for _,argument in ipairs(arg) do
+	if argument == "--cron" then
+		processYoutube()
+		processRT()
+	end
 
---[[
---	TODO: Build an interactive console for adding/removing youtube channels, or other things
-if arg[1] == "--cron" then
-		sync()
-		os.exit()
+	if argument == "--youtube" then
+		processYoutube()
+	end
+
+	if argument == "--rt" or argument == "--roosterteeth" then
+		processRT()
+	end
 end
 
+
+safeClose()
+--[[
+--Interactive prompt still needs to be implemented
 print("Didn't find --cron argument, running interactively. Type ? for help.")
 while true do
 	io.write("> ")
