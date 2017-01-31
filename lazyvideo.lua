@@ -47,11 +47,12 @@ function processYoutube()
 		for _,video in pairs(playlist["entries"]) do
 			if db["ignore"][video["id"]] == nil then
 				db["ignore"][video["id"]] = true
+				filename = (video["uploader"].." - "..video["title"]..".mkv") --Fallback to mkv as it will take any container youtube-dl splits at it.
 
 				--Here we don't use exec because we don't need the output.
-				os.execute("youtube-dl -o \"/tmp/lazyvideo/%(uploader)s - %(title)s.%(ext)s\" \""..video["webpage_url"].."\"")
+				os.execute("youtube-dl -o \"/tmp/lazyvideo/"..filename.."\" \""..video["webpage_url"].."\"")
 				-- Workaround for letting rt-downloader decide the name, and not this program.
-				os.execute("mv \"/tmp/lazyvideo/"..video["uploader"].."*\" \""..db["config"]["path"].."/\"")
+				os.execute("mv \"/tmp/lazyvideo/"..filename.."\" \""..db["config"]["path"].."/\"")
 				--Using path combined with youtube-dl autonaming https://github.com/rg3/youtube-dl/#output-template
 			end
 		end
