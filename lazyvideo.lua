@@ -20,11 +20,11 @@ for _,argument in ipairs(arg) do
 	end
 
 	if argument == "--youtube" then
-		process.Youtube()
+		youtube = true
 	end
 
 	if argument == "--rt" or argument == "--roosterteeth" then
-		process.RT()
+		rt = true
 	end
 
 	if argument == "-v" then
