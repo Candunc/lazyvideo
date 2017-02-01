@@ -33,6 +33,21 @@ function exec(command)
 	return data
 end
 
+-- "Verbose" execute, if enabled display to stdout, otherwise throw away.
+function vexec(command)
+	if verbose == true then
+		os.execute(command)
+	else
+		os.execute(command.." >/dev/null 2>&1")
+	end
+end 
+
+function log(input)
+	if verbose == true then
+		print(os.date("%F %T - ")..input)
+	end
+end
+
 --If my motivation to socialize matched my motivation to automate
 --my routine, I'd probably be a better person. 
 
@@ -42,20 +57,35 @@ function processYoutube()
 		return nil
 	end
 
-	for _,channel in ipairs(db["config"]["youtube"]) do
-		playlist = json.decode(exec("youtube-dl -J --playlist-items 1-4 https://www.youtube.com/user/"..channel.."/videos")) --Why the limit of 4? That's a good question.
-		for _,video in pairs(playlist["entries"]) do
-			if db["ignore"][video["id"]] == nil then
-				db["ignore"][video["id"]] = true
-				filename = (video["uploader"].." - "..video["title"])
+	local toProcess = {}
+	local count = 0
+	local time = 0
 
-				--Here we don't use exec because we don't need the output.
-				os.execute("youtube-dl -o \"/tmp/lazyvideo/"..filename.."\" \""..video["webpage_url"].."\"")
+	for _,channel in ipairs(db["config"]["youtube"]) do
+		time = os.clock()
+		playlist = json.decode(exec("youtube-dl -J --playlist-items 1-4 https://www.youtube.com/user/"..channel.."/videos")) --Why the limit of 4? That's a good question.
+		for _,entry in pairs(playlist["entries"]) do
+			if db["ignore"][entry["id"]] == nil then
 				
-				-- Having the wildcard _outside_ the quotes and letting youtube-dl decide the filename should make things work.
-				os.execute("mv \"/tmp/lazyvideo/"..filename.."\"* \""..db["config"]["path"].."/\"")
+				--Remove unnecessary data, and set other important data.
+				entry["formats"] = nil
+				entry["requested_formats"] = nil
+				entry["filename"] = (entry["uploader"].." - "..entry["title"])
+
+				count = (count+1)
+				toProcess[count] = entry				
 			end
 		end
+		log("Processed "..channel.." in "..(os.clock()-time).." seconds.")
+	end
+
+	--Download all youtube videos sequentially _after_ getting all the metadata.
+	for _,video in ipairs(toProcess) do
+		db["ignore"][video["id"]] = true
+		vexec("youtube-dl -o \"/tmp/lazyvideo/"..video["filename"].."\" \""..video["webpage_url"].."\"")
+				
+		-- Having the wildcard _outside_ the quotes and letting youtube-dl decide the filename should make things work.
+		os.execute("mv \"/tmp/lazyvideo/"..video["filename"].."\"* \""..db["config"]["path"].."/\"")
 	end
 end
 
@@ -118,6 +148,10 @@ for _,argument in ipairs(arg) do
 
 	if argument == "--rt" or argument == "--roosterteeth" then
 		processRT()
+	end
+
+	if argument == "-v" then
+		verbose = true
 	end
 end
 
