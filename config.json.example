@@ -1,5 +1,6 @@
 {
 	"path":"/home/user/videos",
+	"tempdir":"/tmp/lazyvideo"
 	"username":"",
 	"password":"",
 	"roosterteeth":[

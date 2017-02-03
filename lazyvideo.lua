@@ -5,7 +5,12 @@ json = require("json")
 db = {}
 util.loadDB("config")
 util.loadDB("ignore")
-os.execute("mkdir /tmp/lazyvideo >/dev/null 2>&1")
+
+if db["config"]["tempdir"] == nil or db["config"]["tempdir"] == "" then
+	db["config"]["tempdir"] = "/tmp/lazyvideo"
+end
+
+os.execute("mkdir \""..db["config"]["tempdir"].."\" >/dev/null 2>&1")
 
 if db["config"]["path"] == nil or db["config"]["path"] == "" then
 	db["config"]["path"] = "."
