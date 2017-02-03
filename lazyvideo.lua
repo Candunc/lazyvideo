@@ -10,12 +10,12 @@ if db["config"]["tempdir"] == nil or db["config"]["tempdir"] == "" then
 	db["config"]["tempdir"] = "/tmp/lazyvideo"
 end
 
-os.execute("mkdir \""..db["config"]["tempdir"].."\" >/dev/null 2>&1")
-
 if db["config"]["path"] == nil or db["config"]["path"] == "" then
 	db["config"]["path"] = "."
 	util.saveDB("config")
 end
+
+os.execute("mkdir \""..db["config"]["tempdir"].."\" >/dev/null 2>&1")
 
 --Set variables so we cycle through _all_ arguments before 
 for _,argument in ipairs(arg) do

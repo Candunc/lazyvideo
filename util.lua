@@ -19,7 +19,7 @@ end
 function util.safeClose()
 	-- Flush database to file at end, rather than after every call.
 	util.saveDB("ignore")
-	os.execute("rmdir \""..db["config"]["tmpdir"]..\" >/dev/null 2>&1")
+	os.execute("rmdir \""..db["config"]["tempdir"].."\" >/dev/null 2>&1")
 	os.exit()
 end
 

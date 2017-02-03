@@ -33,10 +33,10 @@ function process.Youtube()
 	for _,video in ipairs(toProcess) do
 		util.log("Downloading '"..video["filename"].."'")
 		db["ignore"][video["id"]] = true
-		util.vexec("youtube-dl -o \""..db["config"]["tmpdir"].."/"..video["filename"].."\" \""..video["webpage_url"].."\"")
+		util.vexec("youtube-dl -o \""..db["config"]["tempdir"].."/"..video["filename"].."\" \""..video["webpage_url"].."\"")
 				
 		-- Having the wildcard _outside_ the quotes and letting youtube-dl decide the filename should make things work.
-		util.vexec("mv \""..db["config"]["tmpdir"].."/"..video["filename"].."\"* \""..db["config"]["path"].."/\"")
+		util.vexec("mv \""..db["config"]["tempdir"].."/"..video["filename"].."\"* \""..db["config"]["path"].."/\"")
 	end
 end
 
@@ -69,11 +69,11 @@ function process.RT()
 			url =  (" \"http://"..video["channelUrl"].."/episode/"..video["slug"].."\" ")
 
 			if username_set == true then
-				util.vexec("youtube-dl -o \""..db["config"]["tmpdir"].."/"..filename.."\" -u "..db["config"]["username"].." -p "..db["config"]["password"]..url)
+				util.vexec("youtube-dl -o \""..db["config"]["tempdir"].."/"..filename.."\" -u "..db["config"]["username"].." -p "..db["config"]["password"]..url)
 			else
-				util.vexec("youtube-dl -o \""..db["config"]["tmpdir"].."/"..filename.."\" "..url)
+				util.vexec("youtube-dl -o \""..db["config"]["tempdir"].."/"..filename.."\" "..url)
 			end
-			util.vexec("mv \""..db["config"]["tmpdir"].."/"..filename.."\" \""..db["config"]["path"].."/\"")
+			util.vexec("mv \""..db["config"]["tempdir"].."/"..filename.."\" \""..db["config"]["path"].."/\"")
 		end
 	end
 end
